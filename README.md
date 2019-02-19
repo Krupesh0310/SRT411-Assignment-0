@@ -1,9 +1,9 @@
 # SRT411-Assignment-0
 
-###What we have to do in assignment as per my knowledge###
+What we have to do in assignment as per my knowledge
 In this assignment we have to complete the To-do list from the document in this link https://cran.r-project.org/doc/contrib/Torfs+Brauer-Short-R-Intro.pdf. After completing this to-do in R markdown we have to convert this .Rmd file into the PDF using Knit, after that we have to make an account in the GitHub and make a repository which will include the .Rmd file and PDF file of the R code and output and one read me file which will explain the assignment
 
-##Assignment Instruction##
+Assignment Instruction
 Assignment 0: Intro to R and Github
 
 This lab is to be done in groups of two only.
