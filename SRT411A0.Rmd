@@ -82,7 +82,7 @@ sqrt(mean(rnorm(100)))
 
 11)
 ```{r}
-d = data.frame(g = c(3,4,5),h = c(12,43,54))
+d = data.frame(g = c(4,5,6),h = c(13,44,55))
 write.table(d, file="tst1.txt", row.names=FALSE)
 d2 = read.table(file="tst1.txt",header=TRUE)
 d2$g*5
@@ -90,7 +90,7 @@ d2$g*5
 
 12)
 ```{r}
-date1=strptime( c("20160127","20161003"),format="%Y%m%d")
+date1=strptime( c("20180125","20181003"),format="%Y%m%d")
 present=c(10,6)
 date1
 ```
