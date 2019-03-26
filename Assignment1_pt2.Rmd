@@ -1,0 +1,157 @@
+---
+title: "SRT411 Assignment 1 Part 2"
+author: "Tharsha Kokulabalan, Krupesh Patel, Rashami Chauhan"
+date: "March 23, 2019"
+output: pdf_document
+---
+
+The purpose of part 2 of the assignment is to analyze a dataset provided within the assignment documentation and then take away some meaning from the presented data. we will also visualize the data to further represent the meanings taken away from our analysis.
+
+The dataset we will be using is one present within SecRepo. We will be using the http.log dataset in particular. 
+
+##Preliminary Data analysis 
+
+We initially need to load the dataset into R studio as seen below:
+
+```{r loading data}
+setwd("~/Downloads/")
+datafile <- "http.csv"
+dat <- read.csv(file="http.csv", header=TRUE, sep=",")
+```
+
+The summary() function can be used to display an overview of the dataset and give us an idea of how the data is structured. Information such as this will us determine any correlations with the data or chosen data fields. It will also offer interesting statistics such as certain 5 number summaries.
+
+```{r summmary command}
+summary(dat)
+```
+
+The str() function can further provide more context to the data, in particular the columns and their distinct variable types.It can also give us a deeper statistical analysis of the columns by giving minimum values, maximum values as well as median values pertaining to the other columns. It can also return means and quartiles. 
+
+```{r str function}
+str(dat)
+```
+
+The variable types can give us another distinction to base our data analysis on, for example integer values can be compared, graphed and correlated within the regular conventions of mathetical/numerical relations (minimuns, maximums, averages, ranges). With this in mind we can look at a dataset's integer variable columns and derive meaning from the values as such.
+
+A quick glance at the output from the str() function can show us these fields:
+
+- ts: timestamp of traffic
+- uid: unique id of the traffic
+- id.orig_h: source IP address 
+- id.orig_p: source port
+- id.resp_h: destination IP address
+- id.resp_p: destination port
+- trans_depth: the pipelined depth into the connection
+- method: type of web request (GET/POST, etc)
+- host: host address serving the request
+- uri: specific resource being accessed (page name)
+- referrer: the referrer header value
+- user_agent: value of the user agent header
+- request_.body_len: uncompressed content size of data transferred from client
+- response_.body_len: uncompressed content size of data transferred from server
+- status_code: HTTP status code of request
+- status_msg:HTTP status message of request
+- info_code: last 1xx info reply code from server
+- info_msg: last 1xx info reply message from server
+- filename: content-disposition server header info
+- tags: tags for various attributes in the request
+- username: username value if basic-auth is performed in request
+- password: password value if basic-auth is performed in request
+- proxied: headers that might show a proxied request 
+- orig_fuids: an ordered vector of file uIDs from the origin
+- orig_mime_types: an ordered vector of mime types from the origin
+- resp_fuids: an ordered vector of file uIDs from the destination
+- resp_mime_types: an ordered vector of mime types from the destination
+
+There are a few factors within the variables of this dataset. These factors are variables of interest that may display interesting findings in our analysis. these factors are:
+
+- host: the host can determine what target is trying to be accessed in any malicious efforts 
+- uri: uri field can point to a specific resource or file of interest in any attacks
+- status_code: status code can determine the result of an attack (eg: 200 returns a successful response while 404 returns a "not found")
+- username: can determine any trace from the attacker end for credentials
+
+##Data Clean Up
+
+In this process we will be cleaning up any values that are not required such as some fields like info_code contain the value "NA" which is not useful in our analysis. This section will focus on cleaning the dataset up for further analysis.
+
+```{r cleaning}
+formdat <- data.frame(dat$ts, dat$uid, dat$id.orig_h, dat$id.orig_p, dat$id.resp_h, dat$id.resp_p, dat$host, dat$uri, dat$status_code, dat$username)
+
+library(dplyr)
+
+cleandat <- dplyr::filter(formdat, !grepl("(empty)", dat.username)) 
+```
+
+We can better understand the results of our cleanup by comparing the original dataset with the newly cleaned dataset as seen below.
+
+```{r comparing datasets}
+summary(dat)
+
+summary(cleandat)
+
+str(dat)
+
+str(cleandat)
+
+```
+
+As can be seen in the output of the summary commands for both datasets, the original dataset contains values that are empty signified as such: "(empty)", while the new dataset has had these useless values removed before our analysis.
+
+##Exploratory Data Analysis
+
+in this section we will be using some commands to derive an understandable meaning from the data.
+
+First we can take a look at the top five requesting sources:
+
+```{r requesting sources}
+topsources <- sort(table(cleandat$dat.id.orig_h),decreasing=TRUE)[1:5]
+```
+
+Top 5 most common usernames may also provide further context as to who might be maliciously targetting the webservers:
+
+```{r usernames}
+topusers <- sort(table(cleandat$dat.username),decreasing=TRUE)[1:5]
+```
+
+To gather a deeper understanding of what resources are most sought out by attackers, we could use the sort function to return the top 3 most requested uris:
+
+```{r uris}
+topusers <- sort(table(cleandat$dat.uri),decreasing=TRUE)[1:3]
+```
+
+##Data Visualization
+
+This section will focus on visualizing the corellations from the above functions to further illustrate any meanings within the data.
+
+```{r source IP graph}
+library(ggplot2)
+i.chart <- names(sort(table(cleandat$dat.id.orig_h),decreasing=TRUE))[1:5]
+igg <- ggplot(data=subset(cleandat,dat.id.orig_h %in% i.chart),aes(x=reorder(dat.id.orig_h, dat.id.orig_h, length)))
+igg <- igg + geom_bar(fill="red")
+igg <- igg + labs(title="Top Five Source IPs", x="IP Address", y="Request Count")
+igg <- igg + coord_flip()
+igg <- igg + theme(panel.grid=element_blank(),panel.background=element_blank())
+print(igg)
+```
+
+```{r username graph}
+library(ggplot2)
+u.chart <- names(sort(table(cleandat$dat.username),decreasing=TRUE))[1:5]
+ugg <- ggplot(data=subset(cleandat,dat.username %in% u.chart),aes(x=reorder(dat.username, dat.username, length)))
+ugg <- ugg + geom_bar(fill="yellow")
+ugg <- ugg + labs(title="Top Five Username Traffic", x="Usernames", y="Request Count")
+ugg <- ugg + coord_flip()
+ugg <- ugg + theme(panel.grid=element_blank(),panel.background=element_blank())
+print(ugg)
+```
+
+```{r uri graph}
+library(ggplot2)
+ur.chart <- names(sort(table(cleandat$dat.uri),decreasing=TRUE))[1:3]
+urgg <- ggplot(data=subset(cleandat,dat.uri %in% ur.chart),aes(x=reorder(dat.uri, dat.uri, length)))
+urgg <- urgg + geom_bar(fill="blue")
+urgg <- urgg + labs(title="Top 3 URI Traffic", x="Usernames", y="Request Count")
+urgg <- urgg + coord_flip()
+urgg <- urgg + theme(panel.grid=element_blank(),panel.background=element_blank())
+print(urgg)
+```
